@@ -1,0 +1,44 @@
+{
+	"name": "fire-alias-react",
+	"private": true,
+	"version": "1.0.0",
+	"scripts": {
+		"build": "rsbuild build",
+		"dev": "rsbuild dev --open",
+		"format": "prettier --write .",
+		"lint": "eslint .",
+		"preview": "rsbuild preview"
+	},
+	"dependencies": {
+		"@radix-ui/react-label": "^2.1.0",
+		"@radix-ui/react-slot": "^1.1.0",
+		"class-variance-authority": "^0.7.0",
+		"clsx": "^2.1.1",
+		"fastest-levenshtein": "^1.0.16",
+		"lucide-react": "^0.460.0",
+		"parse-favicon": "^7.0.1",
+		"react": "^18.3.1",
+		"react-dom": "^18.3.1",
+		"rxjs": "^7.8.1",
+		"tailwind-merge": "^2.5.4",
+		"tailwindcss-animate": "^1.0.7",
+		"webextension-polyfill": "^0.12.0"
+	},
+	"devDependencies": {
+		"@eslint/compat": "^1.2.0",
+		"@eslint/js": "^9.12.0",
+		"@rsbuild/core": "^1.0.19",
+		"@rsbuild/plugin-react": "^1.0.6",
+		"@types/react": "^18.3.12",
+		"@types/react-dom": "^18.3.1",
+		"@types/webextension-polyfill": "^0.12.1",
+		"eslint": "^9.12.0",
+		"eslint-plugin-react": "^7.37.1",
+		"eslint-plugin-react-hooks": "^5.0.0",
+		"globals": "^15.11.0",
+		"prettier": "^3.3.3",
+		"tailwindcss": "^3.4.15",
+		"typescript": "^5.6.3",
+		"typescript-eslint": "^8.8.1"
+	}
+}
