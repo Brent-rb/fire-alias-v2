@@ -5,25 +5,15 @@
 Install the dependencies:
 
 ```bash
-pnpm install
+npm install
 ```
 
 ## Get Started
 
-Start the dev server:
+Make a build:
 
 ```bash
-pnpm dev
+npm run build
 ```
 
-Build the app for production:
-
-```bash
-pnpm build
-```
-
-Preview the production build locally:
-
-```bash
-pnpm preview
-```
+Then add it as a debug addon
