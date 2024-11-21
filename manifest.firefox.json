@@ -12,7 +12,7 @@
 	"omnibox": {
 		"keyword": "goto"
 	},
-	"action": {
+	"browser_action": {
 		"default_icon": {
 			"16": "icon.png",
 			"24": "icon.png",

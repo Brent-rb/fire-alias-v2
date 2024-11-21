@@ -1,16 +1,22 @@
-import { distance, closest } from "fastest-levenshtein"
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { distance } from "fastest-levenshtein"
 import { BehaviorSubject, Observable, type Subject } from "rxjs"
-import browser, { runtime, type Omnibox } from "webextension-polyfill"
+import browser, { type Omnibox } from "webextension-polyfill"
+import { NoUrlDefinedError } from "./errors/no-url-defined-error"
+import { addHttps, startsWithProtocol } from "./utils/url-utils"
 
 export enum StorageKeys {
 	AliasMap = "alias_map",
 }
 
 interface AliasDistance {
-	distance: number
 	alias: string
-	url: string
+	distance: number
 }
+
+type AliasSuggestion = {
+	url: string
+} & AliasDistance
 
 function getAliasMapFromLocal() {
 	return browser.storage.local.get(StorageKeys.AliasMap)
@@ -32,28 +38,87 @@ function setAliasMapToSync(map: { [key: string]: string }) {
 	})
 }
 
-function getBestMatches(distances: AliasDistance[], limit = 5) {
-	let suggestions: browser.Omnibox.SuggestResult[] = []
+function getSortedDistances(aliases: string[], enteredAlias: string) {
+	const distances: AliasDistance[] = []
 
-	for (var i = 0; i < distances.length && i < limit; i++) {
-		suggestions.push({
-			content: distances[i].url,
-			description: distances[i].alias,
+	aliases.forEach((alias) => {
+		const dist = distance(enteredAlias, alias)
+
+		distances.push({
+			distance: dist,
+			alias,
 		})
+	})
+
+	distances.sort((a, b) => {
+		return a.distance - b.distance
+	})
+
+	return distances
+}
+
+function toSuggestResult(
+	items: AliasSuggestion[],
+): browser.Omnibox.SuggestResult[] {
+	return items.map((item) => ({
+		content: item.url,
+		description: item.alias,
+	}))
+}
+
+function getPrefixLength(value: string, prefix: string) {
+	let i
+	for (i = 0; i < Math.min(value.length, prefix.length); i++) {
+		if (value.charAt(i) !== prefix.charAt(i)) {
+			break
+		}
 	}
 
-	return suggestions
+	return i
+}
+
+function replaceParameters(alias: string, url: string, input: string) {
+	const aliasParts = alias.split(" ")
+	const inputParts = input.split(" ").slice(aliasParts.length)
+
+	let replacedUrl = url
+	replacedUrl = replacedUrl.replace(/\{0\}/g, alias)
+	replacedUrl = replacedUrl.replace(/\{@\}/g, encodeURIComponent(inputParts.join(" ")))
+
+	for (let i = 0; i < inputParts.length; i++) {
+		const parameter = i + 1
+		replacedUrl = replacedUrl.replace(new RegExp(`\\{${parameter}\\}`, "g"), inputParts[i])
+	}
+
+	return replacedUrl
 }
 
 export class FireAlias {
 	private aliasMap = new Map<string, string>()
-	private lastSuggestions: browser.Omnibox.SuggestResult[] = []
+	private lastSuggestions: AliasSuggestion[] = []
 	private aliasSubject: Subject<[string, string][]> = new BehaviorSubject<
 		[string, string][]
 	>([])
 
 	constructor() {
 		this.loadFromStorage()
+	}
+
+	private has(alias: string) {
+		return this.aliasMap.has(alias)
+	}
+
+	private get(alias: string) {
+		return this.aliasMap.get(alias)
+	}
+
+	private getDefined(alias: string) {
+		const url = this.aliasMap.get(alias)
+		if (!url) {
+			throw new NoUrlDefinedError(alias)
+		}
+
+		return url
 	}
 
 	private onUpdate() {
@@ -81,44 +146,72 @@ export class FireAlias {
 		this.loadFromObject(storageMap as any)
 	}
 
-	private calculateDistances(aliases: string[], enteredAlias: string) {
-		const distances: AliasDistance[] = []
+	private addUrls(items: AliasDistance[], input: string = ""): AliasSuggestion[] {
+		const validItems = items.filter((item) => this.has(item.alias))
+		return validItems.map((item) => ({
+			...item,
+			url: replaceParameters(item.alias, this.getDefined(item.alias), input),
+		}))
+	}
 
-		aliases.forEach((alias) => {
-			const dist = distance(enteredAlias, alias)
+	private findLongestPrefix(text: string) {
+		const keys = [...this.aliasMap.keys()]
 
-			distances.push({
-				distance: dist,
-				alias,
-				url: this.aliasMap.get(alias) ?? "",
-			})
-		})
+		const prefixLenghts = keys.map((key) => ({
+			key,
+			length: getPrefixLength(key, text),
+		}))
 
-		distances.sort((a, b) => {
-			return a.distance - b.distance
-		})
-
-		return distances
+		prefixLenghts.sort((a, b) => b.length - a.length)
+		if (prefixLenghts.length === 0) {
+			return undefined
+		}
+		return prefixLenghts[0].key
 	}
 
 	private getMatches(text: string) {
-		var keys = [...this.aliasMap.keys()]
-		let distances = this.calculateDistances(keys, text)
-		const suggestions = getBestMatches(distances, 6)
-		this.lastSuggestions = suggestions
+		const keys = [...this.aliasMap.keys()]
+		const longestPrefix = this.findLongestPrefix(text)
+		keys.splice(keys.findIndex((key) => key === longestPrefix))
+		const prefixKeys = keys.filter((key) => key.startsWith(text))
+		const nonPrefixKeys = keys.filter((key) => !key.startsWith(text))
 
-		return suggestions
+		const longestPrefixDistance = getSortedDistances(
+			longestPrefix ? [longestPrefix] : [],
+			text,
+		)
+		const prefixDistances = getSortedDistances(prefixKeys, text)
+		const nonPrefixDistances = getSortedDistances(nonPrefixKeys, text)
+		const aliasSuggestions = [
+			...longestPrefixDistance,
+			...prefixDistances,
+			...nonPrefixDistances,
+		].slice(
+			0,
+			Math.min(
+				prefixDistances.length +
+					nonPrefixDistances.length +
+					longestPrefixDistance.length,
+				6,
+			),
+		)
+
+		return this.addUrls(aliasSuggestions, text)
 	}
 
-	private tryMatchAlias(text: string) {
-		const suggestion = this.lastSuggestions.find(
-			(suggestion) => suggestion.description.localeCompare(text) === 0,
+	private findTextInLastSuggestions(text: string) {
+		const firstSuggestion = this.lastSuggestions.find(
+			(suggestion) => suggestion.alias.localeCompare(text) === 0,
+		)
+		const secondSuggestion = this.lastSuggestions.find(
+			(suggestion) => suggestion.url.localeCompare(text) === 0,
 		)
 		const fallback =
 			this.lastSuggestions.length > 0
 				? this.lastSuggestions[0]
 				: undefined
-		return suggestion ?? fallback
+
+		return firstSuggestion ?? secondSuggestion ?? fallback
 	}
 
 	private async saveItems() {
@@ -162,7 +255,7 @@ export class FireAlias {
 	}
 
 	public async addItem(alias: string, url: string) {
-		this.aliasMap.set(alias, url)
+		this.aliasMap.set(alias.trim(), url.trim())
 		await this.saveItems()
 		this.onUpdate()
 	}
@@ -186,35 +279,52 @@ export class FireAlias {
 		addSuggestions: (suggestions: browser.Omnibox.SuggestResult[]) => void,
 	) => {
 		const suggestions = this.getMatches(text)
-		addSuggestions(suggestions)
+		addSuggestions(toSuggestResult(suggestions))
+	}
+
+	private getBestMatch(input: string): AliasSuggestion {
+		const matches = this.getMatches(input)
+		const fallback = this.findTextInLastSuggestions(input) 
+		const bestMatch = matches.length > 0 ? matches[0] : undefined
+
+		return bestMatch ?? fallback ?? {
+			url: input,
+			alias: "",
+			distance: 0,
+		}
+	}
+
+	private getUrl(input: string) {
+		if (startsWithProtocol(input)) {
+			console.log(`[getUrl][startsWithProtocol]`)
+			return input
+		}
+
+		const bestMatch = this.getBestMatch(input)
+		console.log(`[getUrl][bestMatch][alias: ${bestMatch.alias}, url: ${bestMatch.url}]`)
+		return bestMatch.url
 	}
 
 	public inputEnteredListener = (
 		text: string,
 		disposition: browser.Omnibox.OnInputEnteredDisposition,
 	) => {
-		console.log(text)
-		const suggestion: Omnibox.SuggestResult = this.tryMatchAlias(text) ?? {
-			content: text,
-			description: "",
-		}
-
-		const url = suggestion.content
-		const prefixedUrl = url.startsWith("http") ? url : `https://${url}`
+		const url = addHttps(this.getUrl(text))
+		console.log(`[inputEnteredListener][url: ${url}]`)
 
 		switch (disposition) {
 			case "currentTab":
 				browser.tabs.update({
-					url: prefixedUrl,
+					url
 				})
 				break
 			case "newForegroundTab":
 				browser.tabs.create({
-					url: prefixedUrl,
+					url
 				})
 				break
 			case "newBackgroundTab":
-				browser.tabs.create({ url: prefixedUrl, active: false })
+				browser.tabs.create({ url, active: false })
 				break
 		}
 	}
