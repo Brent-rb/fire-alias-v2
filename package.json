@@ -2,12 +2,20 @@
 	"name": "fire-alias-react",
 	"private": true,
 	"version": "1.0.0",
+	"engines": {
+		"node": "22.11.0"
+	},
 	"scripts": {
 		"build": "rsbuild build",
 		"dev": "rsbuild dev --open",
 		"format": "prettier --write .",
 		"lint": "eslint .",
-		"preview": "rsbuild preview"
+		"preview": "rsbuild preview",
+		"clean": "rm chrome.zip || true && rm firefox.zip || true && rm source.zip || true && rm icon.png || true",
+		"package:firefox": "rm firefox.zip || true && cd dist-firefox && zip -r ../firefox.zip ./",
+		"package:chrome": "rm chrome.zip || true && cd dist-chrome && zip -r ../chrome.zip ./",
+		"package:src": "zip -r source.zip tsconfig.json tailwind.config.js rsbuild.config.ts README.md postcss.config.cjs package-lock.json  package.json manifest.firefox.json manifest.chrome.json eslint.config.mjs .prettierrc .prettierignore .gitignore src public",
+		"package": "npm run build && npm run package:firefox && npm run package:chrome && npm run package:src"
 	},
 	"dependencies": {
 		"@radix-ui/react-label": "^2.1.0",

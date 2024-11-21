@@ -1,0 +1,30 @@
+{
+	"manifest_version": 3,
+	"name": "FireAlias",
+	"version": "1.0",
+	"description": "Create aliases for websites.",
+	"icons": {
+		"16": "icon.png",
+		"24": "icon.png",
+		"32": "icon.png",
+		"48": "icon.png"
+	},
+	"omnibox": {
+		"keyword": "goto"
+	},
+	"action": {
+		"default_icon": {
+			"16": "icon.png",
+			"24": "icon.png",
+			"32": "icon.png",
+			"48": "icon.png"
+		},
+		"default_title": "FireAlias",
+		"default_popup": "index.html"
+	},
+	"permissions": ["storage"],
+	"background": {
+		"service_worker": "background.js",
+		"type": "module"
+	}
+}

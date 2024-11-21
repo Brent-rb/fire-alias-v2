@@ -1,5 +1,5 @@
 {
-	"manifest_version": 3,
+	"manifest_version": 2,
 	"name": "FireAlias",
 	"version": "1.0",
 	"description": "Create aliases for websites.",
@@ -29,7 +29,7 @@
 	"browser_specific_settings": {
 		"gecko": {
 			"id": "firealias@brent-rb.github",
-			"strict_min_version": "42.0"
+			"strict_min_version": "58.0"
 		}
 	}
 }

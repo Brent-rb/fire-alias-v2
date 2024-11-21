@@ -8,12 +8,12 @@ Install the dependencies:
 npm install
 ```
 
-## Get Started
+## Build
 
-Make a build:
+Build the app for production:
 
 ```bash
 npm run build
 ```
 
-Then add it as a debug addon
+The addon is ready in /dist

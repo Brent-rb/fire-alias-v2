@@ -6,8 +6,15 @@
 # Dist
 node_modules
 dist/
+dist-chrome/
+dist-firefox/
 
 # IDE
 .vscode/*
 !.vscode/extensions.json
 .idea
+
+source.zip
+addon.zip
+firefox.zip
+chrome.zip
