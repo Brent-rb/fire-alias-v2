@@ -1,10 +1,12 @@
-import React, { useCallback, useMemo, useState } from "react"
+import { ReactElement, useCallback, useMemo, useState } from "react"
 import { Button } from "./ui/button"
 import { PencilIcon, SaveIcon, TrashIcon, XIcon } from "lucide-react"
 import { Input } from "./ui/input"
+import { replaceParameters } from "@core/utils/parameter-utils"
 
 interface AliasTableProps {
 	aliases: [string, string][]
+	menu?: ReactElement
 
 	onAliasRemoved?: (alias: string) => void
 	onAliasUpdated?: (
@@ -33,10 +35,10 @@ const AliasRow = ({
 	onAliasRemoved,
 	onAliasUpdated,
 }: AliasRowProps) => {
+	console.log(`[AliasRow][render]`)
 	const [isEditable, setEditable] = useState(false)
 	const [newAlias, setNewAlias] = useState(alias)
 	const [newLink, setNewLink] = useState(link)
-	const [icon, setIcon] = useState<string | undefined>()
 
 	const onDeletePressed = useCallback(() => {
 		onAliasRemoved?.(alias)
@@ -47,6 +49,13 @@ const AliasRow = ({
 	}, [])
 
 	const onSavePressed = useCallback(() => {
+		if (newAlias === "" || newLink === "") {
+			setNewAlias(alias)
+			setNewLink(link)
+			setEditable(false)
+			return
+		}
+
 		onAliasUpdated?.(alias, newAlias, newLink)
 		setEditable(false)
 	}, [alias, newAlias, newLink])
@@ -58,10 +67,18 @@ const AliasRow = ({
 	}, [])
 
 	const imageSource = useMemo(() => {
-		const fixedLink = link.startsWith("http") ? link : `https://${link}`
-		const url = new URL(fixedLink)
-		console.log(`https://${url.host}/favicon_32x32.ico`)
-		return `https://${url.host}/favicon.ico`
+		try {
+			const replacedLink = replaceParameters(alias, link, "")
+			const fixedLink = link.startsWith("http")
+				? replacedLink
+				: `https://${replacedLink}`
+			const url = new URL(fixedLink)
+			console.log(`https://${url.host}/favicon_32x32.ico`)
+			return `https://${url.host}/favicon.ico`
+		} catch (error) {
+			console.warn(error)
+		}
+		return ""
 	}, [link])
 
 	return (
@@ -131,6 +148,7 @@ export const AliasTable = ({
 	onAliasRemoved,
 	onAliasUpdated,
 }: AliasTableProps) => {
+	console.log(`[AliasTable][render]`)
 	const rows = useMemo(() => {
 		return aliases.map(([alias, link], index) => {
 			return (

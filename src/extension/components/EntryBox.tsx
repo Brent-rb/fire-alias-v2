@@ -9,6 +9,7 @@ interface EntryBoxProps {
 }
 
 export const EntryBox = ({ autoClear, onEntryAdded }: EntryBoxProps) => {
+	console.log(`[EntryBox][render]`)
 	const [alias, setAlias] = useState("")
 	const [link, setLink] = useState("")
 
