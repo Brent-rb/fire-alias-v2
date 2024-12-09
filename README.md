@@ -1,8 +1,8 @@
 [![Badge Commits]][Commit Rate]
 [![Badge Issues]][Issues]
-![Badge License]
-![Badge Mozilla]
-![Badge Chrome]
+[![Badge License]][License]
+[![Badge Mozilla]][Mozilla]
+[![Badge Chrome]][Chrome]
 
 <h1 align="center">
     <sub>
@@ -153,13 +153,13 @@ If you ever want to contribute something, think about the people working hard to
 [Extended Syntax]: https://github.com/Brent-rb/fire-alias-v2/wiki/Static-filter-syntax#extended-syntax
 [Privacy Policy]: https://github.com/Brent-rb/fire-alias-v2/wiki/Privacy-policy
 [Permissions]: https://github.com/Brent-rb/fire-alias-v2/wiki/Permissions
-[Commit Rate]: https://github.com/Brent-rb/fire-alias-v2/commits/master
-[Works Best]: https://github.com/Brent-rb/fire-alias-v2/wiki/uBlock-Origin-works-best-on-Firefox
-[Deployment]: https://github.com/Brent-rb/fire-alias-v2/wiki/Deploying-uBlock-Origin
-[Blocking]: https://github.com/Brent-rb/fire-alias-v2/wiki/Blocking-mode
+[Commit Rate]: https://github.com/Brent-rb/fire-alias-v2/commits/main
 [Releases]: https://github.com/Brent-rb/fire-alias-v2/releases
 [Issues]: https://github.com/Brent-rb/fire-alias-v2/issues
 [Wiki]: https://github.com/Brent-rb/fire-alias-v2/wiki
+[License]: https://github.com/Brent-rb/fire-alias-v2/blob/main/LICENSE
+[Mozilla]: https://addons.mozilla.org/firefox/addon/firealias/
+[Chrome]: https://chromewebstore.google.com/detail/firealias/kkdiecfcjiijbplpjjjipgiebcimeokd
 
 <!----------------------------------[ Badges ]--------------------------------->
 
