@@ -1,8 +1,8 @@
 [![Badge Commits]][Commit Rate]
 [![Badge Issues]][Issues]
-[![Badge License]][License]
-[![Badge Mozilla]][Mozilla]
-[![Badge Chrome]][Chrome]
+![Badge License]
+![Badge Mozilla]
+![Badge Chrome]
 
 <h1 align="center">
     <sub>
