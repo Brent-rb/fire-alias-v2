@@ -27,31 +27,38 @@
 FireAlias is a lightweight and intuitive browser addon for Firefox and Chrome that makes navigating to your favorite websites faster and easier than ever before. By creating custom aliases for your favorite websites, FireAlias makes it easier than ever to navigate the web.
 
 ## How it works
+
 1. Configure your aliases in the FireAlias settings panel.
 2. Use the browser's search bar and type `goto <alias>`.
 3. Navigate instantly to the URL associated with the alias, or enhance it with powerful parameter-based customization!
 
 ## Features
+
 ### 🔗 Link Parameters
+
 Enhance your aliases with dynamic URL replacements:
-* {0}: The alias itself.
-* {n}: The n-th word after the alias.
-* {@}: All additional parameters after the alias.
+
+-   {0}: The alias itself.
+-   {n}: The n-th word after the alias.
+-   {@}: All additional parameters after the alias.
 
 #### {@} Example:
-* **alias**: `search`
-* **link**: `google.com/search?q={@}`
-* **usage**: `goto search how many people are currently on the iss`
-* **result**: `https://google.com/search?q=how+many+people+are+currently+on+the+iss`.
+
+-   **alias**: `search`
+-   **link**: `google.com/search?q={@}`
+-   **usage**: `goto search how many people are currently on the iss`
+-   **result**: `https://google.com/search?q=how+many+people+are+currently+on+the+iss`.
 
 #### {n} Example:
-* **alias**: `r`
-* **link**: `reddit.com/r/{1}`
-* **usage**: `goto r all`
-* **result**: `https://reddit.com/r/all`.
+
+-   **alias**: `r`
+-   **link**: `reddit.com/r/{1}`
+-   **usage**: `goto r all`
+-   **result**: `https://reddit.com/r/all`.
 
 ### Conditional Parameters
-Further enhance your aliases with conditional URL replacements. 
+
+Further enhance your aliases with conditional URL replacements.
 If we take a look at the reddit example, if we use the alias by itself (without parameters), it would navigate to `https://www.reddit.com/r/` which ends up in an error page.
 This is not a great experience and it would be nice if we could avoid this.
 That is what conditional parameters are designed to do.
@@ -59,20 +66,64 @@ That is what conditional parameters are designed to do.
 We only want to add the /r/ to the url **if** we enter a parameter as well.
 By using the conditional parameter syntax, we can change our configured link to do exactly this.
 
-The format of conditional parameters is `{?x:y}` where `x` is the parameter (@ or a number) and `y` is the text we want to add if `x` exists. For example: `{?1:/r/}` will only add `/r/` if the parameter `{1}` exists and is not empty. 
+The format of conditional parameters is `{?x:y}` where `x` is the parameter (@ or a number) and `y` is the text we want to add if `x` exists. For example: `{?1:/r/}` will only add `/r/` if the parameter `{1}` exists and is not empty.
 
 If we configure an alias with the following setup:
-* **alias**: `r`
-* **link**: `reddit.com{?1:/r/}{1}`
-`goto r` will go to `https://reddit.com` but `goto r all` will go to `https://reddit.com/r/all`
+
+-   **alias**: `r`
+-   **link**: `reddit.com{?1:/r/}{1}`
+    `goto r` will go to `https://reddit.com` but `goto r all` will go to `https://reddit.com/r/all`
 
 Parameters can also be nested recursively so the example above can also be written as:
-* **alias**: `r`
-* **link**: `reddit.com{?1:/r/{1}}`
-And it will function in the same way.
+
+-   **alias**: `r`
+-   **link**: `reddit.com{?1:/r/{1}}`
+    And it will function in the same way.
 
 For example this alias will only add the first parameter if 3 parameters are written:
 `reddit.com{?3:{?2:{?1:/r/{1}}}}`
+
+### Casing Parameters
+
+Link Parameters allow you to do some cool things such as navigating to a specific github repository.
+
+```
+gh -> github.com/Brent-rb/{1}
+```
+
+Unfortunately it can be tiresome to type out these repository names with the correct casing by hand.
+Luckily version 1.3 introduces a solution for this!
+
+FireAlias has the following casing replacements that you can uses:
+
+-   **upper**: transforms text to UPPER CASE
+-   **lower**: transforms text to lower case
+-   **capital** transforms text to Capital Case
+-   **kebab**: transforms text to kebab-case
+-   **snake**: transforms text to snake_case
+-   **camel**: transforms text to camelCase
+-   **pascal**: transforms text to PascalCase
+-   **dot**: transforms text to dot.case
+-   **path**: transforms text to path/case
+
+You can use these parameters as such:
+
+```
+gh -> github.com/Brent-rb/{kebab:{@}}
+```
+
+With this example I can type `goto gh fire alias v2` to end up in this exact repository.
+As always, commands are parsed recuresively so you can combine these function as you wish:
+
+```
+gh -> github.com{?1:/Brent-rb/{upper:{kebab:{@}}}}
+```
+
+This alias will only go to a repository of mine if there is at least 1 parameter.
+Everything after `gh` will be transformed into kebab case, which is then made upper case.
+
+So typing `goto gh` would evaluate to `github.com`.
+Typing `goto gh fire alias v2` would evaluate to `github.com/Brent-rb/FIRE-ALIAS-V2.
 
 #### Firefox
 
@@ -96,8 +147,8 @@ Free. Open-source. For users by users. No donations sought.
 
 If you ever want to contribute something, think about the people working hard to maintain the filter lists you are using, which are available to use by all for free.
 
-
 <!---------------------------------[ Internal ]-------------------------------->
+
 [Manual Installation]: https://github.com/Brent-rb/fire-alias-v2/tree/master/dist#install
 [Extended Syntax]: https://github.com/Brent-rb/fire-alias-v2/wiki/Static-filter-syntax#extended-syntax
 [Privacy Policy]: https://github.com/Brent-rb/fire-alias-v2/wiki/Privacy-policy
@@ -111,6 +162,7 @@ If you ever want to contribute something, think about the people working hard to
 [Wiki]: https://github.com/Brent-rb/fire-alias-v2/wiki
 
 <!----------------------------------[ Badges ]--------------------------------->
+
 [Badge Commits]: https://img.shields.io/github/commit-activity/m/Brent-rb/fire-alias-v2?label=Commits
 [Badge Mozilla]: https://img.shields.io/amo/rating/firealias?logo=firefox
 [Badge License]: https://img.shields.io/badge/License-GPLv3-blue.svg
