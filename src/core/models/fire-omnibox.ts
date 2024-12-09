@@ -26,7 +26,7 @@ function aliasInfoSort(a: AliasInfo, b: AliasInfo) {
 	const prefixCompare = prefixDescendingSort(a, b)
 	const distanceCompare = distanceAscendingSort(a, b)
 
-	return prefixCompare + distanceCompare
+	return prefixCompare !== 0 ? prefixCompare : distanceCompare
 }
 
 function calculatePrefixLength(value: string, prefix: string) {
@@ -69,7 +69,10 @@ export class FireOmnibox {
 		// console.log(`[FireOmnibox][getAliasInfoList]`)
 		const list: AliasInfo[] = this.getAliasList(input).map((alias) => ({
 			...alias,
-			distance: distance(alias.alias, input),
+			distance: distance(
+				alias.alias,
+				input.substring(0, alias.alias.length),
+			),
 			prefix: calculatePrefixLength(alias.alias, input),
 		}))
 

@@ -1,28 +1,46 @@
-function _replacePart(replacementMap: Map<string, string>, alias: string) {
-	const regex = /\{?(\d+?):(.+?)\}/
-	const match = alias.match(regex)
-	if (!match) {
-		const replacement = replacementMap.get(alias) ?? ""
-		console.log(
-			`[_replacePart] ${alias} -> ${replacement === "" ? "<empty-string>" : replacement}`,
-		)
-		return replacement
+import { casingReplacements } from "@core/replacements/casing-replacements"
+import { conditionalReplacements } from "@core/replacements/conditional-replacements"
+import {
+	ReplacementList,
+	StringReplacement,
+} from "@core/types/replacement-types"
+
+function _findReplacement(
+	replacements: ReplacementList,
+	input: string,
+): string | undefined {
+	// #region String replacements
+	const stringReplacements = replacements.filter(
+		(replacement) => typeof replacement.match === "string",
+	) as StringReplacement[]
+	const stringReplacement = stringReplacements.find((replacement) => {
+		console.log(replacement.match, "=", input)
+		return replacement.match === input
+	})
+	if (stringReplacement !== undefined) {
+		return stringReplacement.transform()
 	}
+	// #endregion
 
-	const aliasNumber = match[1]
-	const replacement = match[2]
-
-	if (replacementMap.has(`{${aliasNumber}}`)) {
-		console.log(`[_replacePart] ${alias} -> ${replacement}`)
-		return replacement
+	// #region Regexp replacements
+	const regexReplacements = replacements.filter(
+		(replacement) => replacement.match instanceof RegExp,
+	)
+	const regexReplacement = regexReplacements.find((replacement) => {
+		return input.match(replacement.match) !== null
+	})
+	if (!regexReplacement) {
+		return undefined
 	}
-
-	console.log(`[_replacePart] ${alias} -> <empty-string>`)
-	return ""
+	return regexReplacement.transform(
+		input.match(regexReplacement.match)!,
+		(input) => _findReplacement(replacements, input),
+	)
+	// #endRegion
 }
 
 function _replaceParameters(
-	replacementMap: Map<string, string>,
+	replacements: ReplacementList,
 	url: string,
 	startIndex = 0,
 ) {
@@ -32,9 +50,9 @@ function _replaceParameters(
 		const char = url.charAt(i)
 
 		if (char === "{") {
-			const result = _replaceParameters(replacementMap, url, i + 1)
-			const replacement = _replacePart(
-				replacementMap,
+			const result = _replaceParameters(replacements, url, i + 1)
+			const replacement = _findReplacement(
+				replacements,
 				`{${result.value}}`,
 			)
 			buffer = `${buffer}${replacement}`
@@ -59,14 +77,26 @@ export function replaceParameters(alias: string, url: string, input: string) {
 	const aliasParts = alias.split(" ")
 	const inputParts = input.trim().split(" ").slice(aliasParts.length)
 
-	const replacementMap = new Map([
-		["{0}", alias],
-		["{@}", inputParts.join(" ")],
-	])
+	const partReplacements: StringReplacement[] = inputParts.map(
+		(value, index) => ({
+			match: `${index + 1}`,
+			transform: () => value,
+		}),
+	)
 
-	for (let i = 0; i < inputParts.length; i++) {
-		replacementMap.set(`{${i + 1}}`, inputParts[i])
-	}
+	const replacements: ReplacementList = [
+		{
+			match: "{0}",
+			transform: () => alias,
+		},
+		{
+			match: "{@}",
+			transform: () => inputParts.join(" "),
+		},
+		...partReplacements,
+		...conditionalReplacements,
+		...casingReplacements,
+	]
 
-	return _replaceParameters(replacementMap, url).value
+	return _replaceParameters(replacements, url).value
 }
