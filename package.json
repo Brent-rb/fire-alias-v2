@@ -1,7 +1,7 @@
 {
 	"name": "fire-alias-react",
 	"private": true,
-	"version": "1.3.0",
+	"version": "1.3.1",
 	"engines": {
 		"node": "22.11.0"
 	},
@@ -11,8 +11,8 @@
 		"format": "prettier --write .",
 		"lint": "eslint .",
 		"preview": "rsbuild preview",
-		"clean": "rm chrome.zip || true && rm firefox.zip || true && rm source.zip || true && rm icon.png || true",
-		"package:firefox": "rm firefox.zip || true && cd dist-firefox && zip -r ../firefox.zip ./",
+		"clean": "rm chrome.zip || true && rm firefox.xpi || true && rm source.zip || true && rm icon.png || true",
+		"package:firefox": "rm firefox.xpi || true && cd dist-firefox && zip -r ../firefox.xpi ./",
 		"package:chrome": "rm chrome.zip || true && cd dist-chrome && zip -r ../chrome.zip ./",
 		"package:src": "zip -r source.zip tsconfig.json tailwind.config.js rsbuild.config.ts README.md postcss.config.cjs package.json package-lock.json manifest.firefox.json manifest.chrome.json eslint.config.mjs components.json .prettierrc .prettierignore .gitignore src public",
 		"package": "npm run build && npm run package:firefox && npm run package:chrome && npm run package:src"

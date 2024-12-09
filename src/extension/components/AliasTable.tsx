@@ -35,7 +35,6 @@ const AliasRow = ({
 	onAliasRemoved,
 	onAliasUpdated,
 }: AliasRowProps) => {
-	console.log(`[AliasRow][render]`)
 	const [isEditable, setEditable] = useState(false)
 	const [newAlias, setNewAlias] = useState(alias)
 	const [newLink, setNewLink] = useState(link)
@@ -73,7 +72,6 @@ const AliasRow = ({
 				? replacedLink
 				: `https://${replacedLink}`
 			const url = new URL(fixedLink)
-			console.log(`https://${url.host}/favicon_32x32.ico`)
 			return `https://${url.host}/favicon.ico`
 		} catch (error) {
 			console.warn(error)
@@ -148,7 +146,6 @@ export const AliasTable = ({
 	onAliasRemoved,
 	onAliasUpdated,
 }: AliasTableProps) => {
-	console.log(`[AliasTable][render]`)
 	const rows = useMemo(() => {
 		return aliases.map(([alias, link], index) => {
 			return (

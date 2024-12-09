@@ -9,12 +9,13 @@ function _findReplacement(
 	replacements: ReplacementList,
 	input: string,
 ): string | undefined {
+	input = input.trim()
+
 	// #region String replacements
 	const stringReplacements = replacements.filter(
 		(replacement) => typeof replacement.match === "string",
 	) as StringReplacement[]
 	const stringReplacement = stringReplacements.find((replacement) => {
-		console.log(replacement.match, "=", input)
 		return replacement.match === input
 	})
 	if (stringReplacement !== undefined) {
@@ -27,11 +28,13 @@ function _findReplacement(
 		(replacement) => replacement.match instanceof RegExp,
 	)
 	const regexReplacement = regexReplacements.find((replacement) => {
-		return input.match(replacement.match) !== null
+		const hasMatch = input.match(replacement.match) !== null
+		return hasMatch
 	})
 	if (!regexReplacement) {
 		return undefined
 	}
+
 	return regexReplacement.transform(
 		input.match(regexReplacement.match)!,
 		(input) => _findReplacement(replacements, input),
@@ -51,10 +54,8 @@ function _replaceParameters(
 
 		if (char === "{") {
 			const result = _replaceParameters(replacements, url, i + 1)
-			const replacement = _findReplacement(
-				replacements,
-				`{${result.value}}`,
-			)
+			const replacement =
+				_findReplacement(replacements, `{${result.value}}`) ?? ""
 			buffer = `${buffer}${replacement}`
 			i = result.position
 		} else if (char === "}") {
@@ -79,7 +80,7 @@ export function replaceParameters(alias: string, url: string, input: string) {
 
 	const partReplacements: StringReplacement[] = inputParts.map(
 		(value, index) => ({
-			match: `${index + 1}`,
+			match: `{${index + 1}}`,
 			transform: () => value,
 		}),
 	)
