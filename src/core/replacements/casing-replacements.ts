@@ -64,4 +64,10 @@ export const casingReplacements: RegexReplacement[] = [
 			return dotCase(match[1])
 		},
 	},
+	{
+		match: /^\{urlencode:(.+?)\}/,
+		transform: (match) => {
+			return encodeURIComponent(match[1])
+		},
+	},
 ]
