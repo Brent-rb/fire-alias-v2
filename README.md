@@ -105,6 +105,7 @@ FireAlias has the following casing replacements that you can uses:
 -   **pascal**: transforms text to PascalCase
 -   **dot**: transforms text to dot.case
 -   **path**: transforms text to path/case
+-   **urlencode**: transforms text to url%20encode
 
 You can use these parameters as such:
 
@@ -123,7 +124,7 @@ This alias will only go to a repository of mine if there is at least 1 parameter
 Everything after `gh` will be transformed into kebab case, which is then made upper case.
 
 So typing `goto gh` would evaluate to `github.com`.
-Typing `goto gh fire alias v2` would evaluate to `github.com/Brent-rb/FIRE-ALIAS-V2.
+Typing `goto gh fire alias v2` would evaluate to `github.com/Brent-rb/FIRE-ALIAS-V2`.
 
 #### Firefox
 
